@@ -39,21 +39,8 @@ Mendukung 3 format cetak standar instansi Kementerian Agama dengan Kop Surat res
 - **Status Live**: Menghitung status kegiatan secara otomatis (*Terjadwal* ➔ *Sedang Berlangsung* ➔ *Sudah Terlaksana*) berdasarkan jam perangkat saat ini.
 - **Deteksi Bentrok Cerdas**: Memperingatkan jika ada 2 kegiatan pada jam yang sama dengan penanggung jawab sama atau lokasi ruangan yang sama.
 
-### 8. 🔒 Proteksi PIN 4-Digit per Jabatan
-- Setiap profil jabatan dilindungi PIN 4-angka (default: `1234`).
-- Pengguna hanya dapat menambah, mengubah, atau menghapus agenda yang menjadi kewenangan jabatannya. PIN dapat diubah mandiri per jabatan.
-
 ---
 
-## 🚀 Panduan Instalasi & Setup Database
-
-### Langkah 1: Setup Supabase Database
-1. Buka dashboard proyek Supabase Anda: [https://supabase.com/dashboard](https://supabase.com/dashboard)
-2. Masuk ke menu **SQL Editor** pada bilah menu sebelah kiri.
-3. Klik **New query**.
-4. Salin dan tempel seluruh isi berkas [`supabase-schema.sql`](supabase-schema.sql) ke editor.
-5. Klik tombol **Run** (atau tekan `Ctrl + Enter`).
-6. Seluruh tabel (`agenda`, `role_pins`, `role_profiles`, `agenda_templates`), kebijakan RLS, dan replikasi Realtime akan otomatis aktif.
 
 ### Langkah 2: Menjalankan di Lokal (Development)
 ```bash
@@ -107,22 +94,3 @@ Akses aplikasi di browser melalui URL: `http://localhost:5173`.
 - Tekan `F11` di keyboard browser untuk tampilan penuh (*True Fullscreen*).
 
 ---
-
-## 🌐 Panduan Deploy ke Vercel
-
-Aplikasi ini sudah siap langsung dideploy ke [Vercel](https://vercel.com):
-
-1. **Push Proyek ke GitHub**:
-   ```bash
-   git add .
-   git commit -m "feat: setup agenda harian MAN 1 Nganjuk lengkap"
-   git push -u origin main
-   ```
-2. **Impor ke Vercel**:
-   - Masuk ke [dashboard Vercel](https://vercel.com/dashboard) dan klik **Add New Project**.
-   - Pilih repositori `Hikam666/agenda-man1-nganjuk`.
-3. **Environment Variables**:
-   Pada pengaturan **Environment Variables** di Vercel, tambahkan dua kunci berikut:
-   - `VITE_SUPABASE_URL`: `https://kxmebhhabhcykwnvcqed.supabase.co`
-   - `VITE_SUPABASE_ANON_KEY`: *(masukkan anon key supabase Anda)*
-4. Klik **Deploy**. Website akan aktif dalam hitungan detik dengan domain gratis HTTPS (misal: `https://agenda-man1-nganjuk.vercel.app`).
