@@ -10,7 +10,9 @@ import {
   UserCheck, 
   KeyRound, 
   LogOut,
-  Settings
+  Settings,
+  Tv,
+  Share2
 } from 'lucide-react';
 import { getRoleDisplayName } from '../lib/constants';
 
@@ -18,8 +20,10 @@ export default function Sidebar({
   activeView,
   setActiveView,
   onOpenAdd,
-  onPrint,
-  onDownloadCsv,
+  onOpenPrintModal,
+  onOpenExportModal,
+  onOpenKioskModal,
+  onShareDailyRecapWa,
   activeRole,
   roleProfiles = {},
   onOpenRoleModal,
@@ -35,7 +39,7 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-68 bg-white border-r border-slate-200 h-screen sticky top-0 z-30 select-none">
+    <aside className="hidden lg:flex lg:flex-col lg:w-72 bg-white border-r border-slate-200 h-screen sticky top-0 z-30 select-none">
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-100 flex items-center gap-3 bg-emerald-800 text-white shadow-xs">
         <img 
@@ -61,7 +65,7 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => setActiveView(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-left ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-sm transition-all duration-150 text-left ${
                 isActive
                   ? 'bg-emerald-50 text-emerald-800 font-semibold shadow-xs'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -73,7 +77,7 @@ export default function Sidebar({
           );
         })}
 
-        <div className="pt-4 px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+        <div className="pt-3 px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
           Tindakan Cepat
         </div>
 
@@ -86,28 +90,46 @@ export default function Sidebar({
         </button>
 
         <button
-          onClick={onPrint}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+          onClick={onShareDailyRecapWa}
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-xs text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200/60 transition-colors text-left"
+          title="Kirim Rekap Agenda Hari Ini ke WhatsApp Group"
         >
-          <Printer className="w-4 h-4 text-slate-400" />
-          <span>Cetak Agenda</span>
+          <Share2 className="w-4 h-4 text-emerald-700" />
+          <span>Bagikan Rekap ke WA</span>
         </button>
 
         <button
-          onClick={onDownloadCsv}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+          onClick={onOpenKioskModal}
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+          title="Mode Layar Informasi / TV Mading Digital"
         >
-          <Download className="w-4 h-4 text-slate-400" />
-          <span>Unduh Data (CSV)</span>
+          <Tv className="w-4 h-4 text-slate-500" />
+          <span>Layar TV Informasi</span>
         </button>
 
-        <div className="pt-4 px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
-          Master Data
+        <button
+          onClick={onOpenPrintModal}
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+        >
+          <Printer className="w-4 h-4 text-slate-400" />
+          <span>Template Cetak</span>
+        </button>
+
+        <button
+          onClick={onOpenExportModal}
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+        >
+          <Download className="w-4 h-4 text-slate-400" />
+          <span>Unduh Data (Excel / CSV)</span>
+        </button>
+
+        <div className="pt-3 px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+          Master Data & Pengaturan
         </div>
 
         <button
           onClick={onOpenSettings}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-left border border-slate-200"
+          className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-medium text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-left border border-slate-200"
         >
           <Settings className="w-4 h-4 text-emerald-700" />
           <span>Pengaturan & Template</span>

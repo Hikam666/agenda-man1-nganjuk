@@ -10,9 +10,10 @@ import {
   Clock, 
   MapPin, 
   Save, 
-  AlertCircle 
+  AlertCircle,
+  Printer
 } from 'lucide-react';
-import { JAB, ROLES, KAT, CATEGORY_COLORS } from '../lib/constants';
+import { JAB, ROLES, KAT, CATEGORY_COLORS, DEFAULT_PRINT_CONFIG } from '../lib/constants';
 
 export default function SettingsModal({
   isOpen,
@@ -22,12 +23,17 @@ export default function SettingsModal({
   templates = [],
   onCreateTemplate,
   onUpdateTemplate,
-  onDeleteTemplate
+  onDeleteTemplate,
+  printConfig = DEFAULT_PRINT_CONFIG,
+  onSavePrintConfig
 }) {
-  const [activeTab, setActiveTab] = useState('pejabat'); // 'pejabat' | 'templates'
+  const [activeTab, setActiveTab] = useState('pejabat'); // 'pejabat' | 'templates' | 'cetak'
   const [localProfiles, setLocalProfiles] = useState(roleProfiles);
+  const [localPrintConfig, setLocalPrintConfig] = useState(printConfig);
   const [isSavingProfiles, setIsSavingProfiles] = useState(false);
+  const [isSavingPrint, setIsSavingPrint] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+  const [printSuccessMsg, setPrintSuccessMsg] = useState('');
 
   // Template Form State
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
@@ -44,12 +50,13 @@ export default function SettingsModal({
   });
   const [templateError, setTemplateError] = useState('');
 
-  // Keep localProfiles in sync when modal opens
   React.useEffect(() => {
     setLocalProfiles(roleProfiles);
+    setLocalPrintConfig(printConfig);
     setProfileSuccessMsg('');
+    setPrintSuccessMsg('');
     setIsEditingTemplate(false);
-  }, [isOpen, roleProfiles]);
+  }, [isOpen, roleProfiles, printConfig]);
 
   if (!isOpen) return null;
 
@@ -74,6 +81,20 @@ export default function SettingsModal({
       console.error(err);
     } finally {
       setIsSavingProfiles(false);
+    }
+  };
+
+  const handleSavePrintConfigSubmit = (e) => {
+    e.preventDefault();
+    setIsSavingPrint(true);
+    try {
+      onSavePrintConfig(localPrintConfig);
+      setPrintSuccessMsg('Pengaturan template cetak & kop surat berhasil disimpan!');
+      setTimeout(() => setPrintSuccessMsg(''), 3500);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingPrint(false);
     }
   };
 
@@ -140,7 +161,7 @@ export default function SettingsModal({
           <div>
             <h3 className="font-bold text-base sm:text-lg">Pengaturan & Master Data Madrasah</h3>
             <p className="text-xs text-emerald-100">
-              Kelola nama pejabat setiap jabatan & template agenda berulang
+              Kelola nama pejabat, template agenda, dan template cetak dokumen
             </p>
           </div>
           <button
@@ -152,10 +173,10 @@ export default function SettingsModal({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 bg-slate-50 px-4 pt-2">
+        <div className="flex border-b border-slate-200 bg-slate-50 px-4 pt-2 overflow-x-auto scrollbar-none">
           <button
             onClick={() => { setActiveTab('pejabat'); setIsEditingTemplate(false); }}
-            className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'pejabat'
                 ? 'border-emerald-700 text-emerald-800 bg-white rounded-t-lg shadow-2xs'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -167,14 +188,26 @@ export default function SettingsModal({
 
           <button
             onClick={() => { setActiveTab('templates'); setIsEditingTemplate(false); }}
-            className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'templates'
                 ? 'border-emerald-700 text-emerald-800 bg-white rounded-t-lg shadow-2xs'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>Kelola Template Agenda ({templates.length})</span>
+            <span>Template Agenda Rutin ({templates.length})</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('cetak'); setIsEditingTemplate(false); }}
+            className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'cetak'
+                ? 'border-emerald-700 text-emerald-800 bg-white rounded-t-lg shadow-2xs'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Printer className="w-4 h-4" />
+            <span>Template Cetak & Kop</span>
           </button>
         </div>
 
@@ -185,7 +218,7 @@ export default function SettingsModal({
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
                 <span>
-                  💡 Nama pejabat yang diisi di bawah akan otomatis tampil pada kartu agenda, riwayat kegiatan, dan dokumen cetak resmi.
+                  💡 Nama pejabat yang diisi di bawah akan otomatis tampil pada kartu agenda, notula, dan laporan cetak/CSV.
                 </span>
                 <button
                   onClick={handleSaveAllProfiles}
@@ -270,7 +303,7 @@ export default function SettingsModal({
             </div>
           )}
 
-          {/* TAB 2: TEMPLATES */}
+          {/* TAB 2: TEMPLATES AGENDAS */}
           {activeTab === 'templates' && (
             <div className="space-y-4">
               {!isEditingTemplate ? (
@@ -507,6 +540,131 @@ export default function SettingsModal({
                 </form>
               )}
             </div>
+          )}
+
+          {/* TAB 3: TEMPLATE CETAK & KOP SURAT */}
+          {activeTab === 'cetak' && (
+            <form onSubmit={handleSavePrintConfigSubmit} className="space-y-4">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
+                Atur kop surat resmi madrasah, format tanda tangan, dan jenis tata letak dokumen cetak default.
+              </div>
+
+              {printSuccessMsg && (
+                <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs rounded-xl flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{printSuccessMsg}</span>
+                </div>
+              )}
+
+              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                <span className="font-bold text-xs uppercase text-slate-700 tracking-wider block border-b pb-1.5">
+                  1. Kop Surat Dokumen Resmi
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Instansi Atas (Baris 1):</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.kopHeader1 || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, kopHeader1: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Kantor Kemenag (Baris 2):</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.kopHeader2 || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, kopHeader2: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Nama Madrasah:</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.kopMadrasah || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, kopMadrasah: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white font-bold text-emerald-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Alamat & Telepon Kop:</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.kopAlamat || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, kopAlamat: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                <span className="font-bold text-xs uppercase text-slate-700 tracking-wider block border-b pb-1.5">
+                  2. Lembar Tanda Tangan Cetak & Excel
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Kota Titimangsa:</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.titimangsaKota || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, titimangsaKota: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Jabatan Penandatangan:</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.jabatanPenandatangan || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, jabatanPenandatangan: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Nama Pejabat:</label>
+                    <input
+                      type="text"
+                      value={localPrintConfig.namaPenandatangan || ''}
+                      onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, namaPenandatangan: e.target.value })}
+                      className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">NIP Penandatangan:</label>
+                  <input
+                    type="text"
+                    value={localPrintConfig.nipPenandatangan || ''}
+                    onChange={(e) => setLocalPrintConfig({ ...localPrintConfig, nipPenandatangan: e.target.value })}
+                    className="w-full text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingPrint}
+                  className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl font-semibold text-xs sm:text-sm hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingPrint ? 'Menyimpan...' : 'Simpan Pengaturan Template Cetak'}</span>
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>

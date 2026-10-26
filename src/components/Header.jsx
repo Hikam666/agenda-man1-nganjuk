@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, KeyRound, Plus, Printer, Download, Settings } from 'lucide-react';
+import { UserCheck, Plus, Printer, Download, Settings, Tv, Share2 } from 'lucide-react';
 import { getRoleDisplayName } from '../lib/constants';
 
 export default function Header({
@@ -9,8 +9,10 @@ export default function Header({
   roleProfiles = {},
   onOpenRoleModal,
   onOpenAdd,
-  onPrint,
-  onDownloadCsv,
+  onOpenPrintModal,
+  onOpenExportModal,
+  onOpenKioskModal,
+  onShareDailyRecapWa,
   onOpenSettings
 }) {
   const titles = {
@@ -30,7 +32,7 @@ export default function Header({
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs">
       {/* Top Navbar */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2.5">
         {/* Mobile School Logo & Title */}
         <div className="flex items-center gap-3">
           <img
@@ -49,52 +51,72 @@ export default function Header({
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Quick Add Button on mobile */}
           <button
             onClick={onOpenAdd}
-            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 transition-colors"
+            className="lg:hidden flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 transition-colors"
             title="Tambah Agenda"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          {/* Quick Share WA on mobile/medium */}
+          <button
+            onClick={onShareDailyRecapWa}
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors"
+            title="Bagikan Rekap Hari Ini ke WhatsApp"
+          >
+            <Share2 className="w-4 h-4 text-emerald-700" />
+          </button>
+
+          {/* Kiosk Mode Button */}
+          <button
+            onClick={onOpenKioskModal}
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-emerald-800 hover:bg-slate-50 transition-colors"
+            title="Mode TV Informasi (Layar Penuh)"
+          >
+            <Tv className="w-4 h-4" />
+          </button>
+
+          {/* Print Template Button for mobile/medium */}
+          <button
+            onClick={onOpenPrintModal}
+            className="hidden sm:inline-flex lg:hidden items-center justify-center p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            title="Template Cetak"
+          >
+            <Printer className="w-4 h-4" />
+          </button>
+
+          {/* Export Modal Button for mobile/medium */}
+          <button
+            onClick={onOpenExportModal}
+            className="hidden sm:inline-flex lg:hidden items-center justify-center p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            title="Unduh Data"
+          >
+            <Download className="w-4 h-4" />
           </button>
 
           {/* Settings Button */}
           <button
             onClick={onOpenSettings}
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-emerald-800 hover:bg-slate-50 transition-colors"
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-emerald-800 hover:bg-slate-50 transition-colors"
             title="Pengaturan & Master Data"
           >
             <Settings className="w-4 h-4" />
           </button>
 
-          {/* Quick Print & CSV for medium screens */}
-          <button
-            onClick={onPrint}
-            className="hidden sm:inline-flex lg:hidden items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Cetak"
-          >
-            <Printer className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onDownloadCsv}
-            className="hidden sm:inline-flex lg:hidden items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Unduh CSV"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-
           {/* Role Status Pill */}
           <button
             onClick={onOpenRoleModal}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
               activeRole
                 ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
                 : 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100'
             }`}
           >
             <UserCheck className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate max-w-[130px] sm:max-w-[200px]">
+            <span className="truncate max-w-[100px] sm:max-w-[180px]">
               {activeRole ? getRoleDisplayName(activeRole, roleProfiles) : 'Pilih Jabatan'}
             </span>
             <span className="text-[10px] text-slate-400">▾</span>

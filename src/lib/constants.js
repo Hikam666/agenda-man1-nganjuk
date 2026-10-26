@@ -17,7 +17,7 @@ export const KAT = [
   "Lainnya"
 ];
 
-export const STA = ["Terjadwal", "Berlangsung", "Selesai", "Dibatalkan"];
+export const STA = ["Otomatis", "Terjadwal", "Sedang Berlangsung", "Sudah Terlaksana", "Dibatalkan"];
 
 export const ROLES = [];
 JAB.forEach(([k, n]) => {
@@ -38,10 +38,6 @@ export const getRoleName = (key) => {
   return found ? found.n : "—";
 };
 
-/**
- * Returns full name including the person's name if registered
- * e.g., "Drs. H. Muh. Zuhal, M.Pd.I (Kepala Madrasah)"
- */
 export const getRoleDisplayName = (key, roleProfiles = {}) => {
   const roleName = getRoleName(key);
   const profile = roleProfiles[key];
@@ -57,6 +53,18 @@ export const getPejabatOnly = (key, roleProfiles = {}) => {
     return profile.pejabat_name.trim();
   }
   return null;
+};
+
+export const DEFAULT_PRINT_CONFIG = {
+  kopHeader1: "KEMENTERIAN AGAMA REPUBLIK INDONESIA",
+  kopHeader2: "KANTOR KEMENTERIAN AGAMA KABUPATEN NGANJUK",
+  kopMadrasah: "MADRASAH ALIYAH NEGERI 1 NGANJUK",
+  kopAlamat: "Jalan Imam Bonjol No. 13 Nganjuk · Telp. (0358) 321683 · Email: man1nganjuk@kemenag.go.id",
+  titimangsaKota: "Nganjuk",
+  jabatanPenandatangan: "Kepala Madrasah",
+  namaPenandatangan: "Drs. H. Muh. Zuhal, M.Pd.I",
+  nipPenandatangan: "197205102000031002",
+  templateType: "rekap" // 'rekap' | 'matriks' | 'notula'
 };
 
 export const DEFAULT_TEMPLATES = [

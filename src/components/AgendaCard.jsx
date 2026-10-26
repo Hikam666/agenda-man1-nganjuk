@@ -9,10 +9,13 @@ import {
   AlertTriangle, 
   Edit3, 
   Trash2,
-  Calendar
+  Calendar,
+  Share2,
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import { getRoleName, getRoleDisplayName, CATEGORY_COLORS } from '../lib/constants';
-import { fmt, conflicts, getEndDate } from '../lib/utils';
+import { fmt, conflicts, getEndDate, computeDynamicStatus, generateAgendaWaText } from '../lib/utils';
 
 export default function AgendaCard({
   agenda,
@@ -27,7 +30,12 @@ export default function AgendaCard({
 
   const isMine = activeRole && agenda.owner === activeRole;
   const isCancelled = agenda.status === 'Dibatalkan';
-  const isDone = agenda.status === 'Selesai';
+  
+  // Calculate dynamic live status based on time!
+  const liveStatus = computeDynamicStatus(agenda);
+  const isOngoing = liveStatus === 'Sedang Berlangsung';
+  const isDone = liveStatus === 'Sudah Terlaksana';
+
   const conflictList = conflicts(agenda, allAgendas);
   const categoryStyle = CATEGORY_COLORS[agenda.kat] || CATEGORY_COLORS['Lainnya'];
   const endDate = getEndDate(agenda);
@@ -52,13 +60,21 @@ export default function AgendaCard({
     }
   };
 
+  const handleShareWa = () => {
+    const text = generateAgendaWaText(agenda, roleProfiles);
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+  };
+
   return (
     <div
       className={`agenda-card bg-white rounded-xl border p-4 sm:p-5 transition-all shadow-xs relative overflow-hidden ${
         isCancelled
           ? 'opacity-60 border-slate-200 border-l-4 border-l-slate-400'
+          : isOngoing
+          ? 'border-emerald-500 border-l-4 border-l-emerald-600 ring-1 ring-emerald-500/20'
           : isDone
-          ? 'opacity-90 border-slate-200 border-l-4 border-l-emerald-600'
+          ? 'opacity-90 border-slate-200 border-l-4 border-l-slate-500'
           : 'border-slate-200 hover:border-slate-300 border-l-4 border-l-emerald-700'
       }`}
     >
@@ -84,17 +100,17 @@ export default function AgendaCard({
             {agenda.kat}
           </span>
           <span
-            className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${
-              agenda.status === 'Selesai'
-                ? 'bg-emerald-100 text-emerald-800 font-semibold'
-                : agenda.status === 'Berlangsung'
-                ? 'bg-amber-100 text-amber-800 font-semibold animate-pulse'
-                : agenda.status === 'Dibatalkan'
+            className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+              isOngoing
+                ? 'bg-emerald-100 text-emerald-900 animate-pulse ring-1 ring-emerald-400 font-extrabold'
+                : isDone
+                ? 'bg-slate-100 text-slate-700 font-semibold'
+                : isCancelled
                 ? 'bg-rose-100 text-rose-800 line-through'
-                : 'bg-slate-100 text-slate-700'
+                : 'bg-blue-100 text-blue-800'
             }`}
           >
-            {agenda.status}
+            {liveStatus}
           </span>
         </div>
       </div>
@@ -104,7 +120,7 @@ export default function AgendaCard({
         {agenda.judul}
       </h3>
 
-      {/* Details (Location, Owner with Pejabat Name, Participants, Notes) */}
+      {/* Details (Location, Owner with Pejabat Name, Participants, Notes, Attachment) */}
       <div className="space-y-1.5 text-xs text-slate-600 mb-3">
         <div className="flex items-center gap-2">
           <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -139,6 +155,21 @@ export default function AgendaCard({
             <span className="italic text-slate-500">{agenda.ket}</span>
           </div>
         )}
+
+        {/* Attachment Link if any */}
+        {agenda.tautan && (
+          <div className="pt-1">
+            <a
+              href={agenda.tautan}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-emerald-50 text-emerald-800 border border-slate-200 text-xs font-semibold transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Buka Tautan Surat / Berkas Lampiran</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Conflict Alert Banner */}
@@ -165,9 +196,19 @@ export default function AgendaCard({
         </div>
       )}
 
-      {/* Action Buttons (Edit & Delete) */}
-      {(isMine || isCancelled) && (
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2 no-print">
+      {/* Action Buttons: WhatsApp Share, Edit & Delete */}
+      <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 no-print">
+        {/* WhatsApp Share Button */}
+        <button
+          onClick={handleShareWa}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs"
+          title="Bagikan ke WhatsApp Group"
+        >
+          <Share2 className="w-3.5 h-3.5 text-emerald-700" />
+          <span>Bagikan ke WA</span>
+        </button>
+
+        <div className="flex items-center gap-1.5">
           {isMine && (
             <button
               onClick={() => onEdit(agenda)}
@@ -178,25 +219,27 @@ export default function AgendaCard({
             </button>
           )}
 
-          <button
-            onClick={handleDeleteClick}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-              confirmDelete
-                ? 'bg-rose-600 text-white border-rose-600 animate-pulse'
-                : 'border-slate-200 bg-white text-rose-600 hover:bg-rose-50 shadow-2xs'
-            }`}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>
-              {confirmDelete
-                ? 'Yakin hapus? Ketuk lagi'
-                : isCancelled
-                ? 'Hapus agenda batal'
-                : 'Hapus'}
-            </span>
-          </button>
+          {(isMine || isCancelled) && (
+            <button
+              onClick={handleDeleteClick}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                confirmDelete
+                  ? 'bg-rose-600 text-white border-rose-600 animate-pulse'
+                  : 'border-slate-200 bg-white text-rose-600 hover:bg-rose-50 shadow-2xs'
+              }`}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>
+                {confirmDelete
+                  ? 'Yakin hapus? Ketuk lagi'
+                  : isCancelled
+                  ? 'Hapus agenda batal'
+                  : 'Hapus'}
+              </span>
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

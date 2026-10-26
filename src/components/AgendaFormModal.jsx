@@ -9,7 +9,8 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Link2
 } from 'lucide-react';
 import { KAT, STA, getRoleDisplayName } from '../lib/constants';
 import { iso, tmin, conflicts } from '../lib/utils';
@@ -34,7 +35,8 @@ export default function AgendaFormModal({
     lokasi: '',
     peserta: '',
     ket: '',
-    status: 'Terjadwal',
+    tautan: '',
+    status: 'Otomatis',
     hasil: '',
     owner: ''
   });
@@ -50,14 +52,15 @@ export default function AgendaFormModal({
       setFormData({
         judul: initialData.judul || '',
         tgl: initialData.tgl || iso(),
-        tgl_end: initialData.tgl_end || initialData.tglEnd || initialData.tgl || iso(),
+        tgl_end: initialData.tgl_end || initialData.tgl_akhir || initialData.tglEnd || initialData.tgl || iso(),
         mulai: initialData.mulai || '07:00',
         selesai: initialData.selesai || '',
         kat: initialData.kat || KAT[0],
         lokasi: initialData.lokasi || '',
         peserta: initialData.peserta || '',
         ket: initialData.ket || '',
-        status: initialData.status || 'Terjadwal',
+        tautan: initialData.tautan || '',
+        status: initialData.status || 'Otomatis',
         hasil: initialData.hasil || '',
         owner: initialData.owner || activeRole || ''
       });
@@ -72,7 +75,8 @@ export default function AgendaFormModal({
         lokasi: '',
         peserta: '',
         ket: '',
-        status: 'Terjadwal',
+        tautan: '',
+        status: 'Otomatis',
         hasil: '',
         owner: activeRole || ''
       });
@@ -346,6 +350,21 @@ export default function AgendaFormModal({
                 className="w-full text-sm py-2 px-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               />
             </div>
+          </div>
+
+          {/* Tautan Berkas / Lampiran */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <Link2 className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Tautan Berkas / Surat Undangan (Google Drive / Link Web Opsional):</span>
+            </label>
+            <input
+              type="url"
+              placeholder="https://drive.google.com/..."
+              value={formData.tautan}
+              onChange={(e) => setFormData({ ...formData, tautan: e.target.value })}
+              className="w-full text-sm py-2 px-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+            />
           </div>
 
           {/* Keterangan & Status */}
