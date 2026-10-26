@@ -1,4 +1,4 @@
-import { getRoleName } from './constants';
+import { getRoleDisplayName } from './constants';
 
 export const iso = (d = new Date()) => {
   const date = typeof d === 'string' ? new Date(d) : d;
@@ -79,7 +79,7 @@ export const conflicts = (a, list = []) => {
   });
 };
 
-export const downloadCsv = (agendas) => {
+export const downloadCsv = (agendas, roleProfiles = {}) => {
   if (!agendas || !agendas.length) return false;
 
   const cell = (v) => {
@@ -117,7 +117,7 @@ export const downloadCsv = (agendas) => {
       a.judul,
       a.kat,
       a.lokasi || '—',
-      getRoleName(a.owner),
+      getRoleDisplayName(a.owner, roleProfiles),
       a.peserta || '—',
       a.ket || '—',
       a.status,

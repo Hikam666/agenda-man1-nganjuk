@@ -4,10 +4,16 @@ import {
   createAgenda, 
   updateAgenda, 
   deleteAgenda, 
+  getRoleProfiles,
+  saveRoleProfile,
+  getTemplates,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
   supabase 
 } from './lib/supabase';
 import { downloadCsv, fmt, iso } from './lib/utils';
-import { getRoleName } from './lib/constants';
+import { getRoleDisplayName, getRoleName } from './lib/constants';
 
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -18,9 +24,12 @@ import MonthView from './components/MonthView';
 import AgendaFormModal from './components/AgendaFormModal';
 import RolePinModal from './components/RolePinModal';
 import ChangePinModal from './components/ChangePinModal';
+import SettingsModal from './components/SettingsModal';
 
 export default function App() {
   const [agendas, setAgendas] = useState([]);
+  const [roleProfiles, setRoleProfiles] = useState({});
+  const [templates, setTemplates] = useState([]);
   const [activeView, setActiveView] = useState('d');
   const [activeRole, setActiveRole] = useState(() => {
     try {
@@ -34,6 +43,7 @@ export default function App() {
   const [editingAgenda, setEditingAgenda] = useState(null);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [isChangePinOpen, setIsChangePinOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,20 +54,27 @@ export default function App() {
     }, 4500);
   };
 
-  // Fetch initial agendas
+  // Fetch initial data (agendas, profiles, templates)
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
       setIsLoading(true);
       try {
-        const data = await getAgendas();
+        const [agendaData, profileData, templateData] = await Promise.all([
+          getAgendas(),
+          getRoleProfiles(),
+          getTemplates()
+        ]);
+
         if (isMounted) {
-          setAgendas(data);
+          setAgendas(agendaData);
+          setRoleProfiles(profileData);
+          setTemplates(templateData);
         }
       } catch (err) {
-        console.error('Failed to load agendas from Supabase:', err);
-        showToast('Gagal menyambung ke database Supabase. Periksa koneksi atau skrip tabel SQL.', 'error');
+        console.error('Failed to load data:', err);
+        showToast('Koneksi database aktif dengan mode offline fallback.', 'info');
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -65,8 +82,8 @@ export default function App() {
 
     loadData();
 
-    // Subscribe to Realtime Postgres Changes
-    const channel = supabase
+    // Subscribe to Realtime Postgres Changes for Agendas
+    const agendaChannel = supabase
       .channel('realtime-agenda-channel')
       .on(
         'postgres_changes',
@@ -88,9 +105,46 @@ export default function App() {
       )
       .subscribe();
 
+    // Subscribe to Realtime Changes for Role Profiles
+    const profilesChannel = supabase
+      .channel('realtime-profiles-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'role_profiles' },
+        (payload) => {
+          if (payload.new && payload.new.role_key) {
+            setRoleProfiles((prev) => ({
+              ...prev,
+              [payload.new.role_key]: payload.new
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to Realtime Changes for Templates
+    const templatesChannel = supabase
+      .channel('realtime-templates-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'agenda_templates' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTemplates((prev) => [payload.new, ...prev.filter(t => t.id !== payload.new.id)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTemplates((prev) => prev.map(t => t.id === payload.new.id ? payload.new : t));
+          } else if (payload.eventType === 'DELETE') {
+            setTemplates((prev) => prev.filter(t => t.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
-      supabase.removeChannel(channel);
+      supabase.removeChannel(agendaChannel);
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(templatesChannel);
     };
   }, []);
 
@@ -142,7 +196,7 @@ export default function App() {
     try {
       localStorage.setItem('who', roleKey);
     } catch (e) {}
-    showToast(`Berhasil masuk sebagai ${getRoleName(roleKey)}.`);
+    showToast(`Berhasil masuk sebagai ${getRoleDisplayName(roleKey, roleProfiles)}.`);
   };
 
   const handleLogout = () => {
@@ -162,12 +216,40 @@ export default function App() {
   };
 
   const handleDownloadCsv = () => {
-    const success = downloadCsv(agendas);
+    const success = downloadCsv(agendas, roleProfiles);
     if (success) {
       showToast('Berkas CSV berhasil diunduh. Siap dibuka di Excel / Google Sheets.');
     } else {
       showToast('Belum ada agenda untuk diunduh.', 'info');
     }
+  };
+
+  // Handler Save Role Profiles
+  const handleSaveRoleProfiles = async (newProfilesMap) => {
+    setRoleProfiles(newProfilesMap);
+    for (const [key, val] of Object.entries(newProfilesMap)) {
+      await saveRoleProfile(key, val);
+    }
+    showToast('Data nama pejabat madrasah berhasil diperbarui.');
+  };
+
+  // Handlers for Templates
+  const handleCreateTemplate = async (templateData) => {
+    const created = await createTemplate(templateData);
+    setTemplates((prev) => [created, ...prev.filter(t => t.id !== created.id)]);
+    showToast(`Template “${created.nama}” berhasil ditambahkan.`);
+  };
+
+  const handleUpdateTemplate = async (id, templateData) => {
+    const updated = await updateTemplate(id, templateData);
+    setTemplates((prev) => prev.map(t => t.id === id ? updated : t));
+    showToast(`Template “${updated.nama}” berhasil diperbarui.`);
+  };
+
+  const handleDeleteTemplate = async (id) => {
+    await deleteTemplate(id);
+    setTemplates((prev) => prev.filter(t => t.id !== id));
+    showToast('Template agenda berhasil dihapus.');
   };
 
   return (
@@ -180,8 +262,10 @@ export default function App() {
         onPrint={handlePrint}
         onDownloadCsv={handleDownloadCsv}
         activeRole={activeRole}
+        roleProfiles={roleProfiles}
         onOpenRoleModal={() => setIsRoleModalOpen(true)}
         onOpenChangePin={() => setIsChangePinOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -191,10 +275,12 @@ export default function App() {
           activeView={activeView}
           setActiveView={setActiveView}
           activeRole={activeRole}
+          roleProfiles={roleProfiles}
           onOpenRoleModal={() => setIsRoleModalOpen(true)}
           onOpenAdd={handleOpenAdd}
           onPrint={handlePrint}
           onDownloadCsv={handleDownloadCsv}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
         {/* Toast Notification Banner */}
@@ -237,7 +323,7 @@ export default function App() {
             <div className="py-20 text-center">
               <div className="w-10 h-10 border-4 border-emerald-700 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="font-semibold text-slate-700 text-sm">Menghubungkan ke Supabase...</p>
-              <p className="text-xs text-slate-400 mt-1">Menyiapkan data agenda harian</p>
+              <p className="text-xs text-slate-400 mt-1">Menyiapkan data agenda & master data</p>
             </div>
           ) : (
             <>
@@ -245,6 +331,7 @@ export default function App() {
                 <DashboardView
                   agendas={agendas}
                   activeRole={activeRole}
+                  roleProfiles={roleProfiles}
                   onNavigateView={(v) => setActiveView(v)}
                   onEditAgenda={handleEditAgenda}
                   onDeleteAgenda={handleDeleteAgenda}
@@ -255,6 +342,7 @@ export default function App() {
                 <TodayView
                   agendas={agendas}
                   activeRole={activeRole}
+                  roleProfiles={roleProfiles}
                   onEditAgenda={handleEditAgenda}
                   onDeleteAgenda={handleDeleteAgenda}
                   onOpenAdd={handleOpenAdd}
@@ -264,6 +352,7 @@ export default function App() {
                 <WeekView
                   agendas={agendas}
                   activeRole={activeRole}
+                  roleProfiles={roleProfiles}
                   onEditAgenda={handleEditAgenda}
                   onDeleteAgenda={handleDeleteAgenda}
                   onOpenAdd={handleOpenAdd}
@@ -273,6 +362,7 @@ export default function App() {
                 <MonthView
                   agendas={agendas}
                   activeRole={activeRole}
+                  roleProfiles={roleProfiles}
                   onEditAgenda={handleEditAgenda}
                   onDeleteAgenda={handleDeleteAgenda}
                   onOpenAdd={handleOpenAdd}
@@ -290,6 +380,8 @@ export default function App() {
         initialData={editingAgenda}
         activeRole={activeRole}
         allAgendas={agendas}
+        templates={templates}
+        roleProfiles={roleProfiles}
         onSave={handleSaveAgenda}
       />
 
@@ -304,6 +396,17 @@ export default function App() {
         isOpen={isChangePinOpen}
         onClose={() => setIsChangePinOpen(false)}
         activeRole={activeRole}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        roleProfiles={roleProfiles}
+        onSaveRoleProfiles={handleSaveRoleProfiles}
+        templates={templates}
+        onCreateTemplate={handleCreateTemplate}
+        onUpdateTemplate={handleUpdateTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
       />
     </div>
   );

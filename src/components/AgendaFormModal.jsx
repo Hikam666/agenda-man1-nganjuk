@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, MapPin, Users, FileText, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
-import { KAT, STA, getRoleName } from '../lib/constants';
+import { 
+  X, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  FileText, 
+  CheckCircle2, 
+  AlertTriangle, 
+  AlertCircle,
+  Sparkles
+} from 'lucide-react';
+import { KAT, STA, getRoleDisplayName } from '../lib/constants';
 import { iso, tmin, conflicts } from '../lib/utils';
 
 export default function AgendaFormModal({
@@ -9,6 +20,8 @@ export default function AgendaFormModal({
   initialData = null,
   activeRole,
   allAgendas = [],
+  templates = [],
+  roleProfiles = {},
   onSave
 }) {
   const [formData, setFormData] = useState({
@@ -30,6 +43,7 @@ export default function AgendaFormModal({
   const [errorMessage, setErrorMessage] = useState('');
   const [conflictList, setConflictList] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   useEffect(() => {
     if (initialData) {
@@ -66,9 +80,30 @@ export default function AgendaFormModal({
     setWarned(false);
     setErrorMessage('');
     setConflictList([]);
+    setSelectedTemplateId('');
   }, [initialData, activeRole, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleApplyTemplate = (templateId) => {
+    setSelectedTemplateId(templateId);
+    if (!templateId) return;
+
+    const tpl = templates.find((t) => t.id === templateId);
+    if (tpl) {
+      setFormData((prev) => ({
+        ...prev,
+        judul: tpl.judul || prev.judul,
+        kat: tpl.kat || prev.kat,
+        mulai: tpl.mulai || prev.mulai,
+        selesai: tpl.selesai || prev.selesai,
+        lokasi: tpl.lokasi || prev.lokasi,
+        peserta: tpl.peserta || prev.peserta,
+        ket: tpl.ket || prev.ket
+      }));
+      setWarned(false);
+    }
+  };
 
   const handleStartDateChange = (val) => {
     setFormData((prev) => {
@@ -140,7 +175,7 @@ export default function AgendaFormModal({
               {initialData ? 'Ubah Agenda Kegiatan' : 'Tambah Agenda Baru'}
             </h3>
             <p className="text-xs text-emerald-100">
-              Penanggung Jawab: {getRoleName(formData.owner || activeRole)}
+              Penanggung Jawab: {getRoleDisplayName(formData.owner || activeRole, roleProfiles)}
             </p>
           </div>
           <button
@@ -153,6 +188,28 @@ export default function AgendaFormModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+          {/* Quick Template Selector */}
+          {!initialData && templates.length > 0 && (
+            <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5">
+              <label className="block text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Gunakan Template Agenda (Isi Otomatis 1-Klik):</span>
+              </label>
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => handleApplyTemplate(e.target.value)}
+                className="w-full text-xs font-medium py-1.5 px-3 rounded-lg border border-emerald-300 bg-white text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">-- Pilih Template Kegiatan Rutin --</option>
+                {templates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {tpl.nama} ({tpl.kat})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Judul Kegiatan */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -359,7 +416,7 @@ export default function AgendaFormModal({
               <ul className="list-disc list-inside space-y-0.5 font-medium pl-1 text-amber-900">
                 {conflictList.map((c) => (
                   <li key={c.id}>
-                    “{c.judul}” (Jam {c.mulai}, {getRoleName(c.owner)}{c.lokasi ? `, Lokasi: ${c.lokasi}` : ''})
+                    “{c.judul}” (Jam {c.mulai}, {getRoleDisplayName(c.owner, roleProfiles)}{c.lokasi ? `, Lokasi: ${c.lokasi}` : ''})
                   </li>
                 ))}
               </ul>

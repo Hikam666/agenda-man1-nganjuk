@@ -9,9 +9,10 @@ import {
   Download, 
   UserCheck, 
   KeyRound, 
-  LogOut 
+  LogOut,
+  Settings
 } from 'lucide-react';
-import { getRoleName } from '../lib/constants';
+import { getRoleDisplayName } from '../lib/constants';
 
 export default function Sidebar({
   activeView,
@@ -20,8 +21,10 @@ export default function Sidebar({
   onPrint,
   onDownloadCsv,
   activeRole,
+  roleProfiles = {},
   onOpenRoleModal,
   onOpenChangePin,
+  onOpenSettings,
   onLogout
 }) {
   const navItems = [
@@ -97,6 +100,18 @@ export default function Sidebar({
           <Download className="w-4 h-4 text-slate-400" />
           <span>Unduh Data (CSV)</span>
         </button>
+
+        <div className="pt-4 px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+          Master Data
+        </div>
+
+        <button
+          onClick={onOpenSettings}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-left border border-slate-200"
+        >
+          <Settings className="w-4 h-4 text-emerald-700" />
+          <span>Pengaturan & Template</span>
+        </button>
       </div>
 
       {/* User / Role Section at Bottom */}
@@ -107,8 +122,8 @@ export default function Sidebar({
               <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
                 Jabatan Aktif
               </span>
-              <span className="font-semibold text-xs text-emerald-900 line-clamp-1" title={getRoleName(activeRole)}>
-                {getRoleName(activeRole)}
+              <span className="font-semibold text-xs text-emerald-900 line-clamp-1" title={getRoleDisplayName(activeRole, roleProfiles)}>
+                {getRoleDisplayName(activeRole, roleProfiles)}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-1.5 pt-1">

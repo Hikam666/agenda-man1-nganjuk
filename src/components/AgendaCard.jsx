@@ -11,13 +11,14 @@ import {
   Trash2,
   Calendar
 } from 'lucide-react';
-import { getRoleName, CATEGORY_COLORS } from '../lib/constants';
+import { getRoleName, getRoleDisplayName, CATEGORY_COLORS } from '../lib/constants';
 import { fmt, conflicts, getEndDate } from '../lib/utils';
 
 export default function AgendaCard({
   agenda,
   allAgendas = [],
   activeRole,
+  roleProfiles = {},
   onEdit,
   onDelete
 }) {
@@ -31,6 +32,11 @@ export default function AgendaCard({
   const categoryStyle = CATEGORY_COLORS[agenda.kat] || CATEGORY_COLORS['Lainnya'];
   const endDate = getEndDate(agenda);
   const isMultiDay = endDate && endDate > agenda.tgl;
+
+  const profile = roleProfiles[agenda.owner];
+  const roleName = getRoleName(agenda.owner);
+  const pejabatName = profile?.pejabat_name?.trim();
+  const nip = profile?.nip?.trim();
 
   const handleDeleteClick = () => {
     if (!confirmDelete) {
@@ -98,16 +104,29 @@ export default function AgendaCard({
         {agenda.judul}
       </h3>
 
-      {/* Details (Location, Owner, Participants, Notes) */}
+      {/* Details (Location, Owner with Pejabat Name, Participants, Notes) */}
       <div className="space-y-1.5 text-xs text-slate-600 mb-3">
         <div className="flex items-center gap-2">
           <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span className="font-medium text-slate-800">{agenda.lokasi || '—'}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span>Penanggung Jawab: <strong className="text-slate-800 font-semibold">{getRoleName(agenda.owner)}</strong></span>
+
+        <div className="flex items-start gap-2">
+          <User className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+          <div>
+            <span>Penanggung Jawab: </span>
+            {pejabatName ? (
+              <>
+                <strong className="text-slate-900 font-bold">{pejabatName}</strong>
+                <span className="text-slate-500 font-medium ml-1">({roleName})</span>
+                {nip && <span className="block text-[11px] text-slate-400 font-mono">NIP. {nip}</span>}
+              </>
+            ) : (
+              <strong className="text-slate-800 font-semibold">{roleName}</strong>
+            )}
+          </div>
         </div>
+
         {agenda.peserta && (
           <div className="flex items-center gap-2">
             <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -129,7 +148,7 @@ export default function AgendaCard({
           <div>
             <strong className="font-semibold">Perhatian Jadwal Bentrok:</strong>
             <p className="mt-0.5 text-amber-800">
-              Bentrok dengan: {conflictList.map(c => `“${c.judul}” (${c.mulai}, ${getRoleName(c.owner)})`).join('; ')}
+              Bentrok dengan: {conflictList.map(c => `“${c.judul}” (${c.mulai}, ${getRoleDisplayName(c.owner, roleProfiles)})`).join('; ')}
             </p>
           </div>
         </div>

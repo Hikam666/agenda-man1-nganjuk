@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Search, Calendar } from 'lucide-react';
-import { JAB, KAT, STA, getRoleName } from '../lib/constants';
+import { JAB, KAT, STA, getRoleDisplayName } from '../lib/constants';
 import { iso, monday, addD, fmt, onDate } from '../lib/utils';
 import AgendaCard from './AgendaCard';
 
 export default function WeekView({
   agendas = [],
   activeRole,
+  roleProfiles = {},
   onEditAgenda,
   onDeleteAgenda,
   onOpenAdd
@@ -69,7 +70,7 @@ export default function WeekView({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
-            placeholder="Cari kegiatan, lokasi, peserta, atau penanggung jawab..."
+            placeholder="Cari kegiatan, lokasi, peserta, atau nama penanggung jawab..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full text-xs sm:text-sm pl-9 pr-3.5 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
@@ -136,7 +137,7 @@ export default function WeekView({
                   a.peserta,
                   a.ket,
                   a.hasil,
-                  getRoleName(a.owner)
+                  getRoleDisplayName(a.owner, roleProfiles)
                 ]
                   .join(' ')
                   .toLowerCase();
@@ -174,6 +175,7 @@ export default function WeekView({
                       agenda={a}
                       allAgendas={agendas}
                       activeRole={activeRole}
+                      roleProfiles={roleProfiles}
                       onEdit={onEditAgenda}
                       onDelete={onDeleteAgenda}
                     />

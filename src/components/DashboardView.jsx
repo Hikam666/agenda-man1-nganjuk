@@ -1,12 +1,13 @@
 import React from 'react';
 import { Calendar, Clock, AlertTriangle, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
-import { KAT, CATEGORY_COLORS, getRoleName } from '../lib/constants';
+import { KAT, CATEGORY_COLORS, getRoleDisplayName } from '../lib/constants';
 import { iso, monday, addD, fmt, onDate, conflicts } from '../lib/utils';
 import AgendaCard from './AgendaCard';
 
 export default function DashboardView({
   agendas = [],
   activeRole,
+  roleProfiles = {},
   onNavigateView,
   onEditAgenda,
   onDeleteAgenda,
@@ -58,7 +59,7 @@ export default function DashboardView({
             </p>
             <p className="text-xs text-emerald-200/90 mt-2">
               {activeRole ? (
-                <>Anda aktif sebagai: <strong className="text-white underline">{getRoleName(activeRole)}</strong></>
+                <>Anda aktif sebagai: <strong className="text-white underline">{getRoleDisplayName(activeRole, roleProfiles)}</strong></>
               ) : (
                 <>Pilih jabatan Anda di bilah menu untuk mengelola agenda madrasah.</>
               )}
@@ -96,7 +97,7 @@ export default function DashboardView({
                   📍 {nextAgenda.lokasi || 'Lokasi belum ditentukan'}
                 </p>
                 <p className="text-xs text-slate-500">
-                  👤 {getRoleName(nextAgenda.owner)}
+                  👤 {getRoleDisplayName(nextAgenda.owner, roleProfiles)}
                 </p>
               </div>
             ) : (
@@ -267,6 +268,7 @@ export default function DashboardView({
                 agenda={a}
                 allAgendas={agendas}
                 activeRole={activeRole}
+                roleProfiles={roleProfiles}
                 onEdit={onEditAgenda}
                 onDelete={onDeleteAgenda}
               />

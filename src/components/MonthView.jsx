@@ -7,6 +7,7 @@ import AgendaCard from './AgendaCard';
 export default function MonthView({
   agendas = [],
   activeRole,
+  roleProfiles = {},
   onEditAgenda,
   onDeleteAgenda,
   onOpenAdd
@@ -194,6 +195,7 @@ export default function MonthView({
                 agenda={a}
                 allAgendas={agendas}
                 activeRole={activeRole}
+                roleProfiles={roleProfiles}
                 onEdit={onEditAgenda}
                 onDelete={onDeleteAgenda}
               />

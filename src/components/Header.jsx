@@ -1,15 +1,17 @@
 import React from 'react';
-import { UserCheck, KeyRound, Plus, Printer, Download } from 'lucide-react';
-import { getRoleName } from '../lib/constants';
+import { UserCheck, KeyRound, Plus, Printer, Download, Settings } from 'lucide-react';
+import { getRoleDisplayName } from '../lib/constants';
 
 export default function Header({
   activeView,
   setActiveView,
   activeRole,
+  roleProfiles = {},
   onOpenRoleModal,
   onOpenAdd,
   onPrint,
-  onDownloadCsv
+  onDownloadCsv,
+  onOpenSettings
 }) {
   const titles = {
     d: 'Dashboard Kegiatan',
@@ -57,6 +59,15 @@ export default function Header({
             <Plus className="w-5 h-5" />
           </button>
 
+          {/* Settings Button */}
+          <button
+            onClick={onOpenSettings}
+            className="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-emerald-800 hover:bg-slate-50 transition-colors"
+            title="Pengaturan & Master Data"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+
           {/* Quick Print & CSV for medium screens */}
           <button
             onClick={onPrint}
@@ -84,7 +95,7 @@ export default function Header({
           >
             <UserCheck className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate max-w-[130px] sm:max-w-[200px]">
-              {activeRole ? getRoleName(activeRole) : 'Pilih Jabatan'}
+              {activeRole ? getRoleDisplayName(activeRole, roleProfiles) : 'Pilih Jabatan'}
             </span>
             <span className="text-[10px] text-slate-400">▾</span>
           </button>
