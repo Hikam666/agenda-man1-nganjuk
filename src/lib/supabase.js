@@ -20,36 +20,89 @@ export async function getAgendas() {
     console.error('Error fetching agendas:', error);
     throw error;
   }
-  return data || [];
+  
+  // Merge locally cached tautan if remote table did not have tautan column yet
+  return (data || []).map((item) => {
+    if (!item.tautan) {
+      try {
+        const localTautan = localStorage.getItem(`tautan_${item.id}`);
+        if (localTautan) item.tautan = localTautan;
+      } catch (e) {}
+    }
+    return item;
+  });
 }
 
 /**
- * Insert new agenda
+ * Insert new agenda with fallback for missing 'tautan' column
  */
 export async function createAgenda(agendaData) {
-  const { data, error } = await supabase
-    .from('agenda')
-    .insert([agendaData])
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('agenda')
+      .insert([agendaData])
+      .select()
+      .single();
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    // Graceful recovery if 'tautan' column is missing in user's Supabase instance
+    if (err && err.message && (err.message.includes('tautan') || err.message.includes('schema cache'))) {
+      console.warn('Kolom "tautan" belum ada di tabel Supabase. Menyimpan ke database dengan fallback aman:', err.message);
+      const { tautan, ...dataWithoutTautan } = agendaData;
+      const { data, error: retryError } = await supabase
+        .from('agenda')
+        .insert([dataWithoutTautan])
+        .select()
+        .single();
+
+      if (retryError) throw retryError;
+      const resultWithTautan = { ...data, tautan: tautan || '' };
+      try {
+        if (tautan) localStorage.setItem(`tautan_${resultWithTautan.id}`, tautan);
+      } catch (e) {}
+      return resultWithTautan;
+    }
+    throw err;
+  }
 }
 
 /**
- * Update existing agenda
+ * Update existing agenda with fallback for missing 'tautan' column
  */
 export async function updateAgenda(id, agendaData) {
-  const { data, error } = await supabase
-    .from('agenda')
-    .update(agendaData)
-    .eq('id', id)
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('agenda')
+      .update(agendaData)
+      .eq('id', id)
+      .select()
+      .single();
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    // Graceful recovery if 'tautan' column is missing in user's Supabase instance
+    if (err && err.message && (err.message.includes('tautan') || err.message.includes('schema cache'))) {
+      console.warn('Kolom "tautan" belum ada di tabel Supabase. Memperbarui agenda dengan fallback aman:', err.message);
+      const { tautan, ...dataWithoutTautan } = agendaData;
+      const { data, error: retryError } = await supabase
+        .from('agenda')
+        .update(dataWithoutTautan)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (retryError) throw retryError;
+      const resultWithTautan = { ...data, tautan: tautan || '' };
+      try {
+        if (tautan) localStorage.setItem(`tautan_${resultWithTautan.id}`, tautan);
+      } catch (e) {}
+      return resultWithTautan;
+    }
+    throw err;
+  }
 }
 
 /**

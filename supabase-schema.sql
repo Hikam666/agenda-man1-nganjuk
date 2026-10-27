@@ -16,10 +16,14 @@ create table if not exists public.agenda (
   lokasi text,
   peserta text,
   ket text,
+  tautan text,
   status text default 'Terjadwal' not null,
   hasil text,
   owner text not null
 );
+
+-- Pastikan kolom tautan ada jika tabel agenda sudah pernah dibuat sebelumnya
+alter table public.agenda add column if not exists tautan text;
 
 create index if not exists idx_agenda_tgl on public.agenda (tgl);
 create index if not exists idx_agenda_owner on public.agenda (owner);

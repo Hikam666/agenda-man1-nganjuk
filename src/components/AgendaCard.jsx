@@ -36,6 +36,13 @@ export default function AgendaCard({
   const isOngoing = liveStatus === 'Sedang Berlangsung';
   const isDone = liveStatus === 'Sudah Terlaksana';
 
+  const formatExternalUrl = (url) => {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (!trimmed) return '#';
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  };
+
   const conflictList = conflicts(agenda, allAgendas);
   const categoryStyle = CATEGORY_COLORS[agenda.kat] || CATEGORY_COLORS['Lainnya'];
   const endDate = getEndDate(agenda);
@@ -160,10 +167,10 @@ export default function AgendaCard({
         {agenda.tautan && (
           <div className="pt-1">
             <a
-              href={agenda.tautan}
+              href={formatExternalUrl(agenda.tautan)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-emerald-50 text-emerald-800 border border-slate-200 text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-emerald-50 text-emerald-800 border border-slate-200 text-xs font-semibold transition-colors shadow-2xs"
             >
               <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
               <span>Buka Tautan Surat / Berkas Lampiran</span>
