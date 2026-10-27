@@ -68,11 +68,16 @@ export default function KioskModal({
             className="w-12 h-12 object-contain bg-white/10 rounded-xl p-1 shadow-md"
           />
           <div>
-            <h1 className="font-extrabold text-lg sm:text-xl text-white tracking-wide">
-              MAN 1 NGANJUK
-            </h1>
-            <p className="text-xs text-emerald-400 font-semibold tracking-wider uppercase">
-              Layar Informasi & Monitoring Agenda Harian
+            <div className="flex items-center gap-2">
+              <h1 className="font-extrabold text-lg sm:text-xl text-white tracking-wide">
+                MAN 1 NGANJUK
+              </h1>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/80 text-[10px] font-bold text-amber-300">
+                MAN 1 Nganjuk Berdaya
+              </span>
+            </div>
+            <p className="text-xs text-emerald-400 font-semibold tracking-wider">
+              Layar Informasi & Agenda Dinas <span className="text-emerald-200/80 font-normal italic lowercase">(Bermakna, Berbudaya, Mendunia)</span>
             </p>
           </div>
         </div>

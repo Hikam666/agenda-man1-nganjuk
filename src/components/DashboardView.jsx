@@ -47,9 +47,11 @@ export default function DashboardView({
         {/* Welcome Card */}
         <div className="lg:col-span-2 bg-gradient-to-br from-emerald-800 to-emerald-950 text-white p-5 sm:p-6 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-emerald-200 text-xs font-medium mb-3 backdrop-blur-xs">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Agenda Resmi MAN 1 Nganjuk</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-200 text-xs font-medium mb-3 backdrop-blur-xs border border-white/10 flex-wrap">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="font-bold text-amber-200">MAN 1 Nganjuk Berdaya</span>
+              <span className="text-emerald-400">·</span>
+              <span className="italic text-emerald-100/90 text-[11px] font-medium">(Bermakna, Berbudaya, Mendunia)</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-1">
               Selamat Datang di Portal Agenda

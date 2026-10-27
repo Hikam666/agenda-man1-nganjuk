@@ -176,6 +176,9 @@ def build_pdf_document():
     pdf.ln(4.5)
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, 5.5, "MADRASAH ALIYAH NEGERI 1 NGANJUK", align="C")
+    pdf.ln(5)
+    pdf.set_font("helvetica", "BI", 8.5)
+    pdf.cell(0, 4.5, "MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)", align="C")
     pdf.ln(8)
     
     # Double line decorative separator

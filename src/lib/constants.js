@@ -60,6 +60,7 @@ export const DEFAULT_PRINT_CONFIG = {
   kopHeader2: "KANTOR KEMENTERIAN AGAMA KABUPATEN NGANJUK",
   kopMadrasah: "MADRASAH ALIYAH NEGERI 1 NGANJUK",
   kopAlamat: "Jalan Imam Bonjol No. 13 Nganjuk · Telp. (0358) 321683 · Email: man1nganjuk@kemenag.go.id",
+  mottoMadrasah: "MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)",
   titimangsaKota: "Nganjuk",
   jabatanPenandatangan: "Kepala Madrasah",
   namaPenandatangan: "Drs. H. Muh. Zuhal, M.Pd.I",

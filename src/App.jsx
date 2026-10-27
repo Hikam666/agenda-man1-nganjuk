@@ -358,6 +358,9 @@ export default function App() {
             <p className="text-[10px] text-gray-700 font-medium">
               {printConfig.kopAlamat || 'Jalan Imam Bonjol No. 13 Nganjuk · Telp. (0358) 321683'}
             </p>
+            <p className="text-[10px] text-gray-800 font-bold tracking-wide italic mt-0.5">
+              MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)
+            </p>
           </div>
 
           <div className="flex justify-between items-center text-xs font-bold uppercase mb-3">

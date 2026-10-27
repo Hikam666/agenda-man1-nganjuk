@@ -44,8 +44,10 @@ export default function Header({
             <h2 className="font-bold text-slate-900 text-base lg:text-lg leading-tight">
               {titles[activeView]}
             </h2>
-            <p className="text-xs text-slate-500 hidden sm:block">
-              MAN 1 Nganjuk · Sinkronisasi Realtime
+            <p className="text-xs text-slate-500 hidden sm:flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold text-emerald-800">MAN 1 Nganjuk Berdaya</span>
+              <span className="text-slate-400">·</span>
+              <span className="italic text-slate-600 font-medium">(Bermakna, Berbudaya, Mendunia)</span>
             </p>
           </div>
         </div>

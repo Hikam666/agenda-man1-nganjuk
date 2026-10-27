@@ -41,15 +41,27 @@ export default function Sidebar({
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-72 bg-white border-r border-slate-200 h-screen sticky top-0 z-30 select-none">
       {/* Brand Header */}
-      <div className="p-5 border-b border-slate-100 flex items-center gap-3 bg-emerald-800 text-white shadow-xs">
-        <img 
-          src="/logo-man1.png" 
-          alt="Logo MAN 1 Nganjuk" 
-          className="w-11 h-11 object-contain drop-shadow-sm bg-white/10 rounded-lg p-1"
-        />
-        <div>
-          <h1 className="font-bold text-base tracking-tight leading-tight">MAN 1 Nganjuk</h1>
-          <p className="text-xs text-emerald-100 font-medium">Agenda Harian Terpadu</p>
+      <div className="p-4 border-b border-emerald-900 bg-emerald-800 text-white shadow-xs">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/logo-man1.png" 
+            alt="Logo MAN 1 Nganjuk" 
+            className="w-11 h-11 object-contain drop-shadow-sm bg-white/10 rounded-lg p-1 shrink-0"
+          />
+          <div className="min-w-0">
+            <h1 className="font-bold text-base tracking-tight leading-tight">MAN 1 Nganjuk</h1>
+            <p className="text-xs text-emerald-100 font-medium">Agenda Harian Terpadu</p>
+          </div>
+        </div>
+        
+        {/* Slogan Motto */}
+        <div className="mt-2.5 pt-2 border-t border-emerald-700/60">
+          <p className="text-[11px] font-bold text-amber-300 tracking-wide leading-tight">
+            MAN 1 Nganjuk Berdaya
+          </p>
+          <p className="text-[10px] text-emerald-100/90 italic font-medium leading-tight mt-0.5">
+            (Bermakna, Berbudaya, Mendunia)
+          </p>
         </div>
       </div>
 

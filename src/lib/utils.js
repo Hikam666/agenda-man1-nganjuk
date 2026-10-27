@@ -133,7 +133,8 @@ ${a.ket ? `📝 *Keterangan:* ${a.ket}\n` : ''}${a.tautan ? `📎 *Tautan Berkas
 Mohon kehadiran dan persiapan bapak/ibu sekalian tepat waktu. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
 
 *Wassalamu'alaikum Wr. Wb.*
-_Humas & Sekretariat MAN 1 Nganjuk_`;
+_Humas & Sekretariat MAN 1 Nganjuk_
+_MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)_`;
 };
 
 /**
@@ -148,7 +149,8 @@ Pemberitahuan Agenda MAN 1 Nganjuk
 
 Alhamdulillah, tidak ada agenda dinas khusus yang terjadwal untuk hari ini. Kegiatan KBM berjalan normal sesuai jadwal pelajaran.
 
-_Humas MAN 1 Nganjuk_`;
+_Humas MAN 1 Nganjuk_
+_MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)_`;
   }
 
   const items = todayAgendas.map((a, idx) => {
@@ -168,7 +170,8 @@ ${items}
 ━━━━━━━━━━━━━━━━━━━━
 Mohon bapak/ibu menyesuaikan tugas dan jadwal masing-masing. Terima kasih.
 *Wassalamu'alaikum Wr. Wb.*
-_Sekretariat & Pimpinan MAN 1 Nganjuk_`;
+_Sekretariat & Pimpinan MAN 1 Nganjuk_
+_MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia)_`;
 };
 
 /**
@@ -212,11 +215,11 @@ export const downloadExcel = async (agendas, roleProfiles = {}, printConfig = DE
   cellA1.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
   sheet.getRow(1).height = 30;
 
-  // Header Banner 2: Subtitle
+  // Header Banner 2: Subtitle & Slogan
   sheet.mergeCells('A2:M2');
   const cellA2 = sheet.getCell('A2');
-  cellA2.value = `DOKUMEN REKAP AGENDA KEGIATAN HARIAN MADRASAH · Diekspor pada ${fmt(iso(now))} pukul ${now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
-  cellA2.font = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF475569' } };
+  cellA2.value = `MAN 1 Nganjuk Berdaya (Bermakna, Berbudaya, Mendunia) · Diekspor pada ${fmt(iso(now))} pukul ${now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
+  cellA2.font = { name: 'Arial', size: 9, bold: true, italic: true, color: { argb: 'FF1B5E20' } };
   cellA2.alignment = { vertical: 'middle', indent: 1 };
   sheet.getRow(2).height = 20;
 
